@@ -1,0 +1,18 @@
+before_install:
+- cp .netrc ~
+- chmod 600 .netrc
+- go get github.com/mitchellh/gox
+script:
+- ./build.sh
+deploy:
+  provider: s3
+  access_key_id: AKIAIPWOFJEXHEJ26VEQ
+  secret_access_key:
+    secure: n6NLSiAvylLIrXAlhHcHyoCmnIdjUSv//eAOTZ3vSnOnUns7sQXrLIdS6Vj1zRzjfkP+jMASfdIwurSL41oRjIpOAz8FpEkJP4eiJBfNpNUsxo8awhhZXpfASSxm8RJhUKbM2z2fwaURiMRVB6nbOzFABs0frGgwcnMMGL8coak=
+  skip_cleanup: true
+  bucket: hello-deploy
+  local-dir: ./debs
+  upload-dir: pkg/kenko
+  acl: private
+  on:
+    repo: hello/kenko
