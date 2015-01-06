@@ -1,3 +1,34 @@
+## How to use
+
+kenko -c /etc/hello/kenko.conf
+
+```
+2015/01/05 22:26:55 [kenko] Configuration loaded from: kenko.conf
+2015/01/05 22:26:55 [kenko] Kenko is configured to report metrics to: 127.0.0.1 on port 127.0.0.1 at a 5s interval.
+...
+```
+
+Example configuration:
+
+```toml
+ec2 = false
+
+[riemann]
+host = "127.0.0.1"
+port = 5555
+exit_on_send_error = true
+
+[event]
+interval = 5
+ttl = 10
+
+[load]
+warning = 10
+critical = 100
+check = true
+```
+
+
 Based on github.com/ippontech/goshin published with the following license
 
 License
