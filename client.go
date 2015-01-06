@@ -23,7 +23,7 @@ func NewThreshold() *Threshold {
 	return &Threshold{}
 }
 
-type RiemannHealth struct {
+type Kenko struct {
 	exitOnSendError bool
 	EventHost       string
 	Interval        int
@@ -36,18 +36,18 @@ type RiemannHealth struct {
 	client          *goryman.GorymanClient
 }
 
-func NewRiemannHealth(address string, exitOnSendError bool) *RiemannHealth {
-	return &RiemannHealth{
+func NewKenko(address string, exitOnSendError bool) *Kenko {
+	return &Kenko{
 		Thresholds:      make(map[string]*Threshold),
 		client:          goryman.NewGorymanClient(address),
 		exitOnSendError: exitOnSendError,
 	}
 }
 
-func (r *RiemannHealth) Start(done chan bool) {
+func (r *Kenko) Start(done chan bool) {
 	err := r.client.Connect()
 	if err != nil {
-		log.Fatalf("[riemann-health] Can not connect to host: %s\n", err)
+		log.Fatalf("[kenko] Can not connect to host: %s\n", err)
 	}
 	cputime := NewCPUTime()
 	memoryusage := NewMemoryUsage()
@@ -55,7 +55,7 @@ func (r *RiemannHealth) Start(done chan bool) {
 	diskUsage := NewDiskUsage("/dev/xvda1")
 
 	// channel size has to be large enough
-	// to allow Goshin send all metrics to Riemann
+	// to allow Kenko send all metrics to Riemann
 	// in g.Interval
 	var collectQueue chan *Metric = make(chan *Metric, 100)
 
@@ -79,7 +79,7 @@ func (r *RiemannHealth) Start(done chan bool) {
 				go diskUsage.Collect(collectQueue)
 			}
 		case <-done:
-			log.Println("[riemann-health] Attempting to close riemann client")
+			log.Println("[kenko] Attempting to close riemann client")
 			r.client.Close()
 			running = false
 			break
@@ -88,7 +88,7 @@ func (r *RiemannHealth) Start(done chan bool) {
 	}
 }
 
-func (r *RiemannHealth) EnforceState(metric *Metric) {
+func (r *Kenko) EnforceState(metric *Metric) {
 
 	threshold, present := r.Thresholds[metric.Service]
 
@@ -108,7 +108,7 @@ func (r *RiemannHealth) EnforceState(metric *Metric) {
 	}
 }
 
-func (r *RiemannHealth) Report(reportQueue chan *Metric, done chan bool) {
+func (r *Kenko) Report(reportQueue chan *Metric, done chan bool) {
 
 	for {
 		select {
@@ -125,15 +125,15 @@ func (r *RiemannHealth) Report(reportQueue chan *Metric, done chan bool) {
 			})
 
 			if err != nil {
-				log.Printf("[riemann-health] Could not send metrics: %s\n", err)
+				log.Printf("[kenko] Could not send metrics: %s\n", err)
 			}
 			if r.exitOnSendError {
-				log.Println("[riemann-health] Shutting down because exitOnSendError is set to true")
+				log.Println("[kenko] Shutting down because exitOnSendError is set to true")
 				done <- true
 				break
 			}
 		case <-done:
-			log.Println("[riemann-health] stopping reporters")
+			log.Println("[kenko] stopping reporters")
 			close(reportQueue)
 			break
 		}

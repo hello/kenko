@@ -11,7 +11,7 @@ import (
 
 var (
 	hostname, _ = os.Hostname()
-	configPath  = flag.String("c", "my_app.conf", "Path to config file. Ex: riemann-health -c /etc/hello/riemann-health.conf")
+	configPath  = flag.String("c", "my_app.conf", "Path to config file. Ex: kenko -c /etc/hello/kenko.conf")
 )
 
 var (
@@ -37,24 +37,24 @@ var (
 
 func main() {
 	flag.Parse()
-	log.Printf("[riemann-health] Configuration loaded from: %s\n", *configPath)
+	log.Printf("[kenko] Configuration loaded from: %s\n", *configPath)
 
 	if err := config.Parse(*configPath); err != nil {
 		log.Fatal(err)
 	}
-	msg := "[riemann-health] riemann-health is configured to report metrics to: %s on port %s at a %ds interval.\n"
+	msg := "[kenko] Kenko is configured to report metrics to: %s on port %s at a %ds interval.\n"
 	log.Printf(msg, *riemannHost, *riemannHost, *eventInterval)
 
 	address := fmt.Sprintf("%s:%d", *riemannHost, *riemannPort)
-	app := NewRiemannHealth(address, *exitOnSendError)
+	app := NewKenko(address, *exitOnSendError)
 
 	app.EventHost = hostname
 	app.Interval = *eventInterval
 
 	if *ec2MetaData {
-		log.Println("[riemann-health] Attempting to get tags from ec2 metadata")
+		log.Println("[kenko] Attempting to get tags from ec2 metadata")
 		app.Tag = GetTags()
-		log.Printf("[riemann-health] Got tags: %s", app.Tag)
+		log.Printf("[kenko] Got tags: %s", app.Tag)
 	}
 
 	app.Ttl = float32(*eventTtl)
