@@ -28,6 +28,9 @@ critical = 100
 check = true
 ```
 
+## TODO:
+
+Bundle with upstart script for easy start/stop/restart
 
 Based on github.com/ippontech/goshin published with the following license
 
