@@ -126,12 +126,13 @@ func (r *Kenko) Report(reportQueue chan *Metric, done chan bool) {
 
 			if err != nil {
 				log.Printf("[kenko] Could not send metrics: %s\n", err)
+				if r.exitOnSendError {
+					log.Println("[kenko] Shutting down because exitOnSendError is set to true")
+					done <- true
+					break
+				}
 			}
-			if r.exitOnSendError {
-				log.Println("[kenko] Shutting down because exitOnSendError is set to true")
-				done <- true
-				break
-			}
+
 		case <-done:
 			log.Println("[kenko] stopping reporters")
 			close(reportQueue)
